@@ -7,6 +7,8 @@
   },
   "dependencies": {
     "@middy/core": "^1.4.0",
+    "@middy/http-cors": "^1.4.0",
+    "@middy/http-error-handler": "^1.4.0",
     "aws-xray-sdk": "^3.2.0",
     "axios": "^0.21.0",
     "http-errors": "^1.8.0",

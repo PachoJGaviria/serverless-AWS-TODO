@@ -28,7 +28,12 @@ const serverlessConfiguration: Serverless = {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
     },
     stage: "${opt:stage, 'dev'}",
-    region: "${opt:region, 'us-east-2'}"
+    region: "${opt:region, 'us-east-2'}",
+    tracing: {
+      apiGateway: true,
+      lambda: true
+    }
+
   },
   functions: {
     Auth: {
@@ -36,7 +41,16 @@ const serverlessConfiguration: Serverless = {
     },
     // TODO: Configure this function
     GetTodos: {
-      handler: 'src/lambda/http/getTodos.handler'
+      handler: 'src/lambda/http/getTodos.handler',
+      events: [
+        {
+          http: {
+            method: 'get',
+            path: 'TODO',
+            cors: true
+          }
+        }
+      ]
     },
     // TODO: Configure this function
     CreateTodo: {
@@ -89,7 +103,12 @@ const serverlessConfiguration: Serverless = {
   },
   // TODO: Add any necessary AWS resources
   resources: {
-    Resources: null
+    Resources: {
+      TodoTable: {
+        Type: 'AWS::DynamoDB::Table',
+
+      }
+    }
   }
 }
 
