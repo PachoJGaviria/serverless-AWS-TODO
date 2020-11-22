@@ -3,7 +3,7 @@ import { TodosRepository } from '../persistence/TodosRepository';
 import { createLogger } from "../utils/logger";
 import { IllegalArgumentError } from './IllegalArgumentError';
 
-const logger = createLogger('TodoRepository')
+const logger = createLogger('UseCases')
 const todosRepository = new TodosRepository();
 
 export async function getAllTodosByUser(userId: string): Promise<TodoItem[]> {

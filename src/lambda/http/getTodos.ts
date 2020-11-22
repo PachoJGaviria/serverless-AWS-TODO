@@ -7,7 +7,7 @@ import cors from '@middy/http-cors';
 import httpErrorHandler from '@middy/http-error-handler';
 import { createLogger } from '../../utils/logger';
 
-const logger = createLogger('TodoRepository')
+const logger = createLogger('GetTodosController')
 
 const getTodosController = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {  
   const userId = getUserId(event);
@@ -15,7 +15,9 @@ const getTodosController = async (event: APIGatewayProxyEvent): Promise<APIGatew
   const todos = await getAllTodosByUser(userId);
   return {
     statusCode: 200,
-    body: JSON.stringify(todos)
+    body: JSON.stringify({
+      items: todos
+    })
   };
 }
 

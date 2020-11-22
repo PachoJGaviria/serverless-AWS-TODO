@@ -1,4 +1,4 @@
-import type { Serverless } from 'serverless/aws';
+import type { AwsFunction, Serverless } from 'serverless/aws';
 
 const serverlessConfiguration: Serverless = {
   service: {
@@ -21,39 +21,59 @@ const serverlessConfiguration: Serverless = {
   provider: {
     name: 'aws',
     runtime: 'nodejs12.x',
+    profile: 'serverless-admin',
+    stage: "${opt:stage, 'dev'}",
+    region: "${opt:region, 'us-east-1'}",
     apiGateway: {
       minimumCompressionSize: 1024,
     },
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+      TODOS_TABLE: "TODOS-${self:provider.stage}",
+      TODOS_USER_INDEX: "UserIdIndex"
     },
-    stage: "${opt:stage, 'dev'}",
-    region: "${opt:region, 'us-east-2'}",
     tracing: {
       apiGateway: true,
       lambda: true
-    }
-
+    },
+    iamRoleStatements: []
   },
   functions: {
     Auth: {
       handler: 'src/lambda/auth/auth0Authorizer.handler'
     },
     // TODO: Configure this function
-    GetTodos: {
+    GetTodos: ({
       handler: 'src/lambda/http/getTodos.handler',
       events: [
         {
           http: {
             method: 'get',
-            path: 'TODO',
-            cors: true
+            path: 'todos',
+            cors: true,
+            authorizer: 'Auth'
           }
         }
+      ], 
+      iamRoleStatements: [
+        {
+          Effect: 'Allow',
+          Action: [
+            'dynamodb:Query'
+          ],
+          Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}'
+        },
+        {
+          Effect: 'Allow',
+          Action: [
+            'dynamodb:Query'
+          ],
+          Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODOS_USER_INDEX}'
+        }
       ]
-    },
+    } as unknown) as AwsFunction,
     // TODO: Configure this function
-    CreateTodo: {
+    /*CreateTodo: {
       handler: 'src/lambda/http/createTodo.handler',
       events: [
         {
@@ -99,14 +119,51 @@ const serverlessConfiguration: Serverless = {
           }
         }
       ]
-    }
+    }*/
   },
   // TODO: Add any necessary AWS resources
   resources: {
     Resources: {
-      TodoTable: {
+      TodoDynamoDBTable: {
         Type: 'AWS::DynamoDB::Table',
-
+        Properties: {
+          TableName: '${self:provider.environment.TODOS_TABLE}',
+          BillingMode: 'PAY_PER_REQUEST',
+          AttributeDefinitions: [
+            {
+              AttributeName: 'userId',
+              AttributeType: 'S'
+            },
+            {
+              AttributeName: 'todoId',
+              AttributeType: 'S'
+            }
+          ],
+          KeySchema: [
+            {
+              AttributeName: 'todoId',
+              KeyType: 'HASH'
+            },
+            {
+              AttributeName: 'userId',
+              KeyType: 'RANGE'
+            }
+          ],
+          GlobalSecondaryIndexes: [
+            {
+              IndexName: '${self:provider.environment.TODOS_USER_INDEX}',
+              KeySchema: [
+                {
+                  AttributeName: 'userId',
+                  KeyType: 'HASH'
+                }
+              ],
+              Projection: {
+                ProjectionType: 'ALL'
+              }
+            }
+          ]
+        }
       }
     }
   }
