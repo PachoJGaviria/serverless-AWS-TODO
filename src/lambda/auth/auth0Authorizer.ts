@@ -80,9 +80,9 @@ async function getJwk(jwtKid: string): Promise<Jwk> {
 }
 
 function certToPEM(cert) {
-  cert = cert.match(/.{1,64}/g).join('\n');
-  cert = `-----BEGIN CERTIFICATE-----\n${cert}\n-----END CERTIFICATE-----\n`;
-  return cert;
+  cert = cert.match(/.{1,64}/g).join('\n')
+  cert = `-----BEGIN CERTIFICATE-----\n${cert}\n-----END CERTIFICATE-----\n`
+  return cert
 }
 
 function getToken(authHeader: string): string {

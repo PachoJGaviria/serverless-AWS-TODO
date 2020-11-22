@@ -1,3 +1,5 @@
+import 'source-map-support/register'
+
 export class IllegalArgumentError extends Error {
 
   readonly statusCode: number

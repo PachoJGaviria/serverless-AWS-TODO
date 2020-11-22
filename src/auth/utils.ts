@@ -1,5 +1,5 @@
+import 'source-map-support/register'
 import { decode } from 'jsonwebtoken'
-
 import { JwtPayload } from './JwtPayload'
 
 /**

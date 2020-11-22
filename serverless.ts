@@ -1,4 +1,4 @@
-import type { AwsFunction, Serverless } from 'serverless/aws';
+import type { AwsFunction, Serverless } from 'serverless/aws'
 
 const serverlessConfiguration: Serverless = {
   service: {
@@ -42,7 +42,7 @@ const serverlessConfiguration: Serverless = {
     Auth: {
       handler: 'src/lambda/auth/auth0Authorizer.handler'
     },
-    // TODO: Configure this function
+    
     GetTodos: ({
       handler: 'src/lambda/http/getTodos.handler',
       events: [
@@ -51,7 +51,9 @@ const serverlessConfiguration: Serverless = {
             method: 'get',
             path: 'todos',
             cors: true,
-            authorizer: 'Auth'
+            authorizer: {
+              name: 'Auth'
+            }
           }
         }
       ], 
@@ -72,19 +74,32 @@ const serverlessConfiguration: Serverless = {
         }
       ]
     } as unknown) as AwsFunction,
-    // TODO: Configure this function
-    /*CreateTodo: {
+    
+    CreateTodo: ({
       handler: 'src/lambda/http/createTodo.handler',
       events: [
         {
           http: {
             method: 'post',
-            path: 'todos'
+            path: 'todos',
+            cors: true,
+            authorizer: {
+              name: 'Auth'
+            }
           }
         }
+      ],
+      iamRoleStatements: [
+        {
+          Effect: 'Allow',
+          Action: [
+            'dynamodb:PutItem'
+          ],
+          Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}'
+        }
       ]
-    },
-    // TODO: Configure this function
+    } as unknown) as AwsFunction,
+    /*// TODO: Configure this function
     UpdateTodo: {
       handler: 'src/lambda/http/updateTodo.handler',
       events: [
@@ -169,4 +184,4 @@ const serverlessConfiguration: Serverless = {
   }
 }
 
-module.exports = serverlessConfiguration;
+module.exports = serverlessConfiguration

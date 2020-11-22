@@ -1,8 +1,9 @@
+import 'source-map-support/register'
 import * as AWS from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
-import { TodoItem } from '../models/TodoItem';
-import { createLogger } from '../utils/logger';
+import { TodoItem } from '../models/TodoItem'
+import { createLogger } from '../utils/logger'
 
 const XAWS = AWSXRay.captureAWS(AWS)
 const logger = createLogger('TodoRepository')
@@ -29,5 +30,13 @@ export class TodosRepository {
       }
     }).promise()
     return result.Items as TodoItem[]
+  }
+
+  async save(todoItem: TodoItem): Promise<void> {
+    logger.info(`TodoRepository: Save a TODO ${todoItem}`)
+    await this.dynamoDBDocClient.put({
+      TableName: this.todosTable,
+      Item: todoItem
+    }).promise()
   }
 }
