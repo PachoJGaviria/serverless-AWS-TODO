@@ -11,6 +11,13 @@ const serverlessConfiguration: Serverless = {
       includeModules: true
     }
   },
+  package: {
+    individually: true,
+    excludeDevDependencies: true,
+    exclude: [
+      'client/**'
+    ]
+  },
   // Add the serverless-webpack plugin
   plugins: [
     'serverless-webpack',
@@ -108,20 +115,33 @@ const serverlessConfiguration: Serverless = {
         }
       ]
     } as unknown) as AwsFunction,
-    // TODO: Configure this function
-    /*UpdateTodo: {
+
+    UpdateTodo: ({
       handler: 'src/lambda/http/updateTodo.handler',
       events: [
         {
           http: {
             method: 'patch',
             path: 'todos/{todoId}',
-            cors: true
+            cors: true,
+            authorizer: {
+              name: 'Auth'
+            }
           }
         }
+      ],
+      iamRoleStatements: [
+        {
+          Effect: 'Allow',
+          Action: [
+            'dynamodb:PutItem',
+            'dynamodb:Query'
+          ],
+          Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}'
+        }
       ]
-    },**/
-    // TODO: Configure this function
+    } as unknown) as AwsFunction,
+
     DeleteTodo: ({
       handler: 'src/lambda/http/deleteTodo.handler',
       events: [
@@ -168,7 +188,7 @@ const serverlessConfiguration: Serverless = {
           ResponseParameters: {
             'gatewayresponse.header.Access-Control-Allow-Origin': "'*'",
             'gatewayresponse.header.Access-Control-Allow-Headers': "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
-            'gatewayresponse.header.Access-Control-Allow-Methods': "'DELETE,GET,OPTIONS,POST'"
+            'gatewayresponse.header.Access-Control-Allow-Methods': "'PATCH,DELETE,GET,OPTIONS,POST'"
           },
           ResponseType: 'DEFAULT_4XX',
           RestApiId: {

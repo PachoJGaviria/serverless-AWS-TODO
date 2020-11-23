@@ -18,6 +18,21 @@ export class TodosRepository {
     private readonly todosUserIndex = process.env.TODOS_USER_INDEX) {
   }
 
+  async getById(todoId: string, userId: string): Promise<TodoItem> {
+    logger.info(`Get TODO by id: ${todoId} - userId: ${userId}`)
+    
+    const result = await this.dynamoDBDocClient.query({
+      TableName: this.todosTable,
+      KeyConditionExpression: 'todoId = :todoId and userId = :userId',
+      ExpressionAttributeValues: {
+        ':todoId': todoId,
+        ':userId': userId
+      }
+    }).promise()
+    const todo = result.Items.length > 0 ? result.Items[0] : undefined
+    return todo as TodoItem
+  }
+
   async getAllTodosByUser(userId: string): Promise<TodoItem[]> {
     logger.info(`Get all TODOS by user ${userId}`)
 
