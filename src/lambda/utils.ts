@@ -1,5 +1,6 @@
-import { APIGatewayProxyEvent } from "aws-lambda";
-import { parseUserId } from "../auth/utils";
+import 'source-map-support/register'
+import { APIGatewayProxyEvent } from "aws-lambda"
+import { parseUserId } from "../auth/utils"
 
 /**
  * Get a user id from an API Gateway event
