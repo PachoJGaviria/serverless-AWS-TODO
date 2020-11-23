@@ -1,7 +1,7 @@
 import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
 import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
-import { completeTodo } from '../../business-logic/CompleteTodoById'
+import { updateTodo } from '../../business-logic/UpdateTodoById'
 import middy from '@middy/core'
 import cors from '@middy/http-cors'
 import httpErrorHandler from '@middy/http-error-handler'
@@ -15,7 +15,7 @@ const updateController : APIGatewayProxyHandler = async (event: APIGatewayProxyE
   const userId = getUserId(event)
   const updatedTodo: UpdateTodoRequest = JSON.parse(event.body)
   logger.info(`Complete a TODO id: ${todoId} - userId: ${userId} - ${JSON.stringify(updatedTodo)}`)
-  await completeTodo(todoId, userId, updatedTodo.dueDate)
+  await updateTodo(todoId, userId, updatedTodo.dueDate, updatedTodo.done)
   return {
     statusCode: 200,
     body: null
