@@ -19,7 +19,7 @@ export class TodosRepository {
   }
 
   async getAllTodosByUser(userId: string): Promise<TodoItem[]> {
-    logger.info(`TodosRepository: Get all TODOS by user ${userId}`)
+    logger.info(`Get all TODOS by user ${userId}`)
 
     const result = await this.dynamoDBDocClient.query({
       TableName: this.todosTable,
@@ -33,10 +33,18 @@ export class TodosRepository {
   }
 
   async save(todoItem: TodoItem): Promise<void> {
-    logger.info(`TodoRepository: Save a TODO ${todoItem}`)
+    logger.info(`Save a TODO ${todoItem}`)
     await this.dynamoDBDocClient.put({
       TableName: this.todosTable,
       Item: todoItem
+    }).promise()
+  }
+
+  async deleteById(todoId: string, userId: string): Promise<void> {
+    logger.info(`Delete a TODO with todoId: ${todoId} userId: ${userId}`)
+    await this.dynamoDBDocClient.delete({
+      TableName: this.todosTable,
+      Key: { todoId, userId }
     }).promise()
   }
 }

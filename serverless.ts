@@ -36,7 +36,16 @@ const serverlessConfiguration: Serverless = {
       apiGateway: true,
       lambda: true
     },
-    iamRoleStatements: []
+    iamRoleStatements: [
+      {
+        Effect: 'Allow',
+        Action: [
+          'xray:PutTraceSegments',
+          'xray:PutTelemetryRecords'
+        ],
+        Resource: '*'
+      }
+    ]
   },
   functions: {
     Auth: {
@@ -99,31 +108,45 @@ const serverlessConfiguration: Serverless = {
         }
       ]
     } as unknown) as AwsFunction,
-    /*// TODO: Configure this function
-    UpdateTodo: {
+    // TODO: Configure this function
+    /*UpdateTodo: {
       handler: 'src/lambda/http/updateTodo.handler',
       events: [
         {
           http: {
             method: 'patch',
-            path: 'todos/{todoId}'
+            path: 'todos/{todoId}',
+            cors: true
           }
         }
       ]
-    },
+    },**/
     // TODO: Configure this function
-    DeleteTodo: {
+    DeleteTodo: ({
       handler: 'src/lambda/http/deleteTodo.handler',
       events: [
         {
           http: {
             method: 'delete',
-            path: 'todos/{todoId}'
+            path: 'todos/{todoId}',
+            cors: true,
+            authorizer: {
+              name: 'Auth'
+            }
           }
         }
+      ],
+      iamRoleStatements: [
+        {
+          Effect: 'Allow',
+          Action: [
+            'dynamodb:DeleteItem'
+          ],
+          Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}'
+        }
       ]
-    },
-    // TODO: Configure this function
+    } as unknown) as AwsFunction
+    /*// TODO: Configure this function
     GenerateUploadUrl: {
       handler: 'src/lambda/http/generateUploadUrl.handler',
       events: [
@@ -139,6 +162,20 @@ const serverlessConfiguration: Serverless = {
   // TODO: Add any necessary AWS resources
   resources: {
     Resources: {
+      APIGatewayDefault4XXResponse: {
+        Type: 'AWS::ApiGateway::GatewayResponse',
+        Properties: {
+          ResponseParameters: {
+            'gatewayresponse.header.Access-Control-Allow-Origin': "'*'",
+            'gatewayresponse.header.Access-Control-Allow-Headers': "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+            'gatewayresponse.header.Access-Control-Allow-Methods': "'DELETE,GET,OPTIONS,POST'"
+          },
+          ResponseType: 'DEFAULT_4XX',
+          RestApiId: {
+            Ref: 'ApiGatewayRestApi'
+          }
+        }
+      },
       TodoDynamoDBTable: {
         Type: 'AWS::DynamoDB::Table',
         Properties: {
@@ -146,11 +183,11 @@ const serverlessConfiguration: Serverless = {
           BillingMode: 'PAY_PER_REQUEST',
           AttributeDefinitions: [
             {
-              AttributeName: 'userId',
+              AttributeName: 'todoId',
               AttributeType: 'S'
             },
             {
-              AttributeName: 'todoId',
+              AttributeName: 'userId',
               AttributeType: 'S'
             }
           ],

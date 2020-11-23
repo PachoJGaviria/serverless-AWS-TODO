@@ -10,9 +10,9 @@ const todosRepository = new TodosRepository()
 
 export async function createTodo(name: string, dueDate: string, userId: string): Promise<TodoItem> {
   if (!name) {
-    throw new IllegalArgumentError('The TODO`s name is required.')
+    throw new IllegalArgumentError('The TODO`s name is required.', logger)
   }
-  logger.info(`CreateTodo: Create new TODO for UserId: ${userId} - name: ${name}`)
+  logger.info(`Create new TODO for UserId: ${userId} - name: ${name}`)
   const todoId = uuidv4()
   const todoItem: TodoItem = {
     userId,

@@ -9,9 +9,7 @@ const todosRepository = new TodosRepository()
 
 export async function getAllTodosByUser(userId: string): Promise<TodoItem[]> {
   if (!userId) {
-    const errorMessage = 'The userId is required.'
-    logger.error(errorMessage)
-    throw new IllegalArgumentError(errorMessage)
+    throw new IllegalArgumentError('The userId is required.', logger)
   }
   return todosRepository.getAllTodosByUser(userId)
 }

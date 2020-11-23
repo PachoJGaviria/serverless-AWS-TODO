@@ -22,7 +22,7 @@ function mapResponse(todoItems: TodoItem[]): string {
 
 const getTodosController = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {  
   const userId = getUserId(event)
-  logger.info(`Lambda: Get All todos by user ${userId}`)
+  logger.info(`Get All todos by user ${userId}`)
   const todos = await getAllTodosByUser(userId)
   return {
     statusCode: 200,
