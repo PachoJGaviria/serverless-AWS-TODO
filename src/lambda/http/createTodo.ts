@@ -10,7 +10,6 @@ import httpErrorHandler from '@middy/http-error-handler'
 import { TodoItem } from '../../models/TodoItem'
 
 const logger = createLogger('CreateTodoController')
-
 function mapResponse(todoItem: TodoItem): string {
   const { userId, ...response } = todoItem
   return JSON.stringify({item: response})

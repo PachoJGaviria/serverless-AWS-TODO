@@ -19,7 +19,7 @@ export class TodosRepository {
   }
 
   async getById(todoId: string, userId: string): Promise<TodoItem> {
-    logger.info(`Get TODO by id: ${todoId} - userId: ${userId}`)
+    logger.info(`Get TODO by todoId: ${todoId} - userId: ${userId}`)
     
     const result = await this.dynamoDBDocClient.query({
       TableName: this.todosTable,

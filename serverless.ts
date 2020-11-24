@@ -37,7 +37,9 @@ const serverlessConfiguration: Serverless = {
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       TODOS_TABLE: "TODOS-${self:provider.stage}",
-      TODOS_USER_INDEX: "UserIdIndex"
+      TODOS_USER_INDEX: "UserIdIndex",
+      TODOS_S3_BUCKET: "todo-pachojgaviria-${self:provider.stage}",
+      SIGNED_URL_EXPIRATION: 300
     },
     tracing: {
       apiGateway: true,
@@ -101,6 +103,11 @@ const serverlessConfiguration: Serverless = {
             cors: true,
             authorizer: {
               name: 'Auth'
+            },
+            request: {
+              schema: {
+                'application/json': '${file(src/models/create-todo-request.json)}'
+              }
             }
           }
         }
@@ -126,6 +133,11 @@ const serverlessConfiguration: Serverless = {
             cors: true,
             authorizer: {
               name: 'Auth'
+            },
+            request: {
+              schema: {
+                'application/json': '${file(src/models/update-todo-request.json)}'
+              }
             }
           }
         }
@@ -165,21 +177,42 @@ const serverlessConfiguration: Serverless = {
           Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}'
         }
       ]
-    } as unknown) as AwsFunction
-    /*// TODO: Configure this function
-    GenerateUploadUrl: {
+    } as unknown) as AwsFunction,
+  
+    GenerateUploadUrl: ({
       handler: 'src/lambda/http/generateUploadUrl.handler',
       events: [
         {
           http: {
             method: 'post',
-            path: 'todos/{todoId}/attachment'
+            path: 'todos/{todoId}/attachment',
+            cors: true,
+            authorizer: {
+              name: 'Auth'
+            }
           }
         }
+      ],
+      iamRoleStatements: [
+        {
+          Effect: 'Allow',
+          Action: [
+            'dynamodb:Query',
+            'dynamodb:PutItem'
+          ],
+          Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}'
+        },
+        {
+          Effect: 'Allow',
+          Action: [
+            's3:PutObject',
+            's3:GetObject'
+          ],
+          Resource: 'arn:aws:s3:::${self:provider.environment.TODOS_S3_BUCKET}/*'
+        }
       ]
-    }*/
+    } as unknown) as AwsFunction
   },
-  // TODO: Add any necessary AWS resources
   resources: {
     Resources: {
       APIGatewayDefault4XXResponse: {
@@ -196,6 +229,7 @@ const serverlessConfiguration: Serverless = {
           }
         }
       },
+      
       TodoDynamoDBTable: {
         Type: 'AWS::DynamoDB::Table',
         Properties: {
@@ -235,6 +269,45 @@ const serverlessConfiguration: Serverless = {
               }
             }
           ]
+        }
+      },
+
+      TodoBucket: {
+        Type: 'AWS::S3::Bucket',
+        Properties: {
+          BucketName: '${self:provider.environment.TODOS_S3_BUCKET}',
+          CorsConfiguration: {
+            CorsRules: [
+              {
+                AllowedOrigins: ["*"],
+                AllowedHeaders: ["*"],
+                AllowedMethods: ["GET", "PUT", "POST", "DELETE", "HEAD"],
+                MaxAge: 3000
+              }
+            ]
+          }
+        }
+      },
+
+      TodoBucketPolicy: {
+        Type: 'AWS::S3::BucketPolicy',
+        Properties: {
+          PolicyDocument: {
+            Id: 'TodoPublicBucketPolicy',
+            Version: '2012-10-17',
+            Statement: [
+              {
+                Sid: 'PublicGetBucketObjects',
+                Effect: 'Allow',
+                Principal: '*',
+                Action: 's3:GetObject',
+                Resource: 'arn:aws:s3:::${self:provider.environment.TODOS_S3_BUCKET}/*'
+              }
+            ]
+          },
+          Bucket: {
+            'Ref': 'TodoBucket'
+          }
         }
       }
     }

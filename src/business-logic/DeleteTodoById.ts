@@ -1,7 +1,7 @@
 import 'source-map-support/register'
 import { createLogger } from '../utils/logger'
 import { TodosRepository } from '../persistence/TodosRepository'
-import { IllegalArgumentError } from './IllegalArgumentError';
+import { IllegalArgumentError } from './IllegalArgumentError'
 
 const logger = createLogger('DeleteTodo')
 const todosRepository = new TodosRepository()

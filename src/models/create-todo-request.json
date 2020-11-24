@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "title": "Create TODO schema validator",
+  "required": [
+      "name",
+      "dueDate"
+  ],
+  "properties": {
+      "name": {
+          "type": "string",
+          "title": "The TODO's name"
+      },
+      "dueDate": {
+          "type": "string",
+          "title": "The TODO's dueDate"
+      }
+  },
+  "additionalProperties": false
+}

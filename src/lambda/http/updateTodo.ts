@@ -14,7 +14,7 @@ const updateController : APIGatewayProxyHandler = async (event: APIGatewayProxyE
   const todoId = event.pathParameters.todoId
   const userId = getUserId(event)
   const updatedTodo: UpdateTodoRequest = JSON.parse(event.body)
-  logger.info(`Complete a TODO id: ${todoId} - userId: ${userId} - ${JSON.stringify(updatedTodo)}`)
+  logger.info(`Complete a TODO todoId: ${todoId} - userId: ${userId} - ${JSON.stringify(updatedTodo)}`)
   await updateTodo(todoId, userId, updatedTodo.dueDate, updatedTodo.done)
   return {
     statusCode: 200,
