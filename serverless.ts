@@ -15,7 +15,8 @@ const serverlessConfiguration: Serverless = {
     individually: true,
     excludeDevDependencies: true,
     exclude: [
-      'client/**'
+      'client/**',
+      '.docs/**'
     ]
   },
   // Add the serverless-webpack plugin
